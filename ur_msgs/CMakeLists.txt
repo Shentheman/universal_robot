@@ -22,6 +22,7 @@ add_service_files(
    FILES
    SetPayload.srv
    SetIO.srv
+   SetFreedrive.srv
 )
 
 
