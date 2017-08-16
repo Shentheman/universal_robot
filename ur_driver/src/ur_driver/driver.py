@@ -22,7 +22,7 @@ from ur_driver.cfg import URDriverConfig
 from ur_driver.deserialize import RobotState, RobotMode
 from ur_driver.deserializeRT import RobotStateRT
 
-from ur_msgs.srv import SetPayload, SetIO
+from ur_msgs.srv import SetPayload, SetIO, SetFreedrive
 from ur_msgs.msg import *
 
 # renaming classes
@@ -132,6 +132,7 @@ class URConnection(object):
         self.robot_state = self.DISCONNECTED
         self.hostname = hostname
         self.port = port
+        self.default_program = program
         self.program = program
         self.last_state = None
 
@@ -146,17 +147,24 @@ class URConnection(object):
         self.__thread.daemon = True
         self.__thread.start()
 
-    def send_program(self):
+    def send_program(self,program=None):
         global prevent_programming
         if prevent_programming:
             rospy.loginfo("Programming is currently prevented")
             return
         assert self.robot_state in [self.READY_TO_PROGRAM, self.EXECUTING]
         rospy.loginfo("Programming the robot at %s" % self.hostname)
+        tgt_state = self.CONNECTED
+        if program is None:
+            self.program = self.default_program
+        else:
+            self.program = program
+            
         self.__sock.sendall(self.program)
         self.robot_state = self.EXECUTING
 
     def send_reset_program(self):
+        self.program = self.default_program
         self.__sock.sendall(RESET_PROGRAM)
         self.robot_state = self.READY_TO_PROGRAM
         
@@ -620,12 +628,35 @@ def within_tolerance(a_vec, b_vec, tol_vec):
     return True
 
 class URServiceProvider(object):
-    def __init__(self, robot):
+    def __init__(self, robot, connection=None):
         self.robot = robot
+        self.connection = connection
         rospy.Service('ur_driver/setPayload', SetPayload, self.setPayload)
+        #rospy.Service('ur_driver/setTeachMode', SetFreedrive, self.setFreedrive)
 
     def set_robot(self, robot):
         self.robot = robot
+
+    def setFreedrive(self, req):
+        return False
+
+        # Not functional yet
+        '''
+        if self.connection:
+            if req.value is False:
+                prog = "Program(set robotmode run\n)"
+                #prog = "end_freedrive_mode()\n"
+                self.connection.send_program(struct.pack("!%is" % len(prog), prog)) 
+                time.sleep(0.1)
+                self.connection.send_reset_program()
+            else:
+                prog = "Program(set robotmode freedrive\n)"
+                prog = "freedrive_mode()\n"
+                self.connection.send_program(struct.pack("!%is" % len(prog), prog)) 
+            return True
+        else:
+            return False
+        '''
 
     def setPayload(self, req):
         if req.payload < min_payload or req.payload > max_payload:
@@ -998,7 +1029,7 @@ def main():
                 if service_provider:
                     service_provider.set_robot(r)
                 else:
-                    service_provider = URServiceProvider(r)
+                    service_provider = URServiceProvider(r,connection)
                 
                 if action_server:
                     action_server.set_robot(r)
