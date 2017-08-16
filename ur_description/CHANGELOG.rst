@@ -2,6 +2,27 @@
 Changelog for package ur_description
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.10 (2017-08-04)
+-------------------
+
+1.1.9 (2017-01-02)
+------------------
+* reintroduce 'pi', unbrake dependent xacros.
+* use '--inorder' to trigger use of jade+ xacro on Indigo.
+* Contributors: gavanderhoorn
+
+1.1.8 (2016-12-30)
+------------------
+* all: update maintainers.
+* Contributors: gavanderhoorn
+
+1.1.7 (2016-12-29)
+------------------
+* Fix xacro warnings in Jade (`#251 <https://github.com/ros-industrial/universal_robot/issues/251>`_)
+* added default values to xacro macro
+* tested joint limits modification
+* Contributors: Dave Coleman, G.A. vd. Hoorn, philip 14.04
+
 1.1.6 (2016-04-01)
 ------------------
 * unify mesh names

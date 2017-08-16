@@ -2,6 +2,22 @@
 Changelog for package universal_robot
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.10 (2017-08-04)
+-------------------
+
+1.1.9 (2017-01-02)
+------------------
+* No changes.
+
+1.1.8 (2016-12-30)
+------------------
+* all: update maintainers.
+* Contributors: gavanderhoorn
+
+1.1.7 (2016-12-29)
+------------------
+* No changes.
+
 1.1.6 (2016-04-01)
 ------------------
 * add moveit_config for ur3
