@@ -1,6 +1,6 @@
 # universal_robot
 ## Gazebo + MoveIt!
-* Please use released version 1.1.10
+* Please use released version 1.1.11
 * http://wiki.ros.org/ur_gazebo
   * To launch the simulated arm and a controller for it
     * `$ roslaunch ur_gazebo ur10.launch`
