@@ -12,6 +12,7 @@ import SocketServer
 import rospy
 import actionlib
 from sensor_msgs.msg import JointState
+from std_msgs.msg import Bool
 from control_msgs.msg import FollowJointTrajectoryAction
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from geometry_msgs.msg import WrenchStamped
@@ -691,6 +692,16 @@ class URTrajectoryFollower(object):
 
         self.update_timer = rospy.Timer(rospy.Duration(self.RATE), self._update)
 
+	# Shen Li: Postpone the trajectory into future if the robot is too close to the human based on the safety checker.
+	self.safe = True
+        rospy.Subscriber("/arm/safety_checking", Bool, self.safety_check_cb)
+
+    def safety_check_cb(self, data):
+        # Shen Li: Postpone the trajectory into future if the robot is too close to the human based on the safety checker.
+        # print data
+        self.safe = data.data
+
+
     def set_robot(self, robot):
         # Cancels any goals in progress
         if self.goal_handle:
@@ -807,6 +818,20 @@ class URTrajectoryFollower(object):
     def _update(self, event):
         if self.robot and self.traj:
             now = time.time()
+
+            # Shen Li: Postpone the trajectory into future if the robot is too close to the human based on the safety checker.
+	    # print self.traj
+            # print "now = ", now
+            # print "self.traj_t0 = ", self.traj_t0
+	    # print [p.time_from_start.to_sec() for p in self.traj.points]
+            if self.safe == False:
+                print "Dangerous! postpone the self.traj\nFrom "\
+                        + str([p.time_from_start.to_sec() for p in self.traj.points])\
+                        + "\nTo " + str(self.RATE) + " secs later"
+                for i in range(1, len(self.traj.points)):
+                    # self.traj.points[i].time_from_start += rospy.Time(now) - rospy.Time(self.traj_t0)
+                    self.traj.points[i].time_from_start += rospy.Duration(self.RATE)
+
             if (now - self.traj_t0) <= self.traj.points[-1].time_from_start.to_sec():
                 self.last_point_sent = False #sending intermediate points
                 setpoint = sample_traj(self.traj, now - self.traj_t0)
