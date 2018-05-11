@@ -828,6 +828,7 @@ class URTrajectoryFollower(object):
                 print "Dangerous! postpone the self.traj\nFrom "\
                         + str([p.time_from_start.to_sec() for p in self.traj.points])\
                         + "\nTo " + str(self.RATE) + " secs later"
+                # We don't change the first point which is the robot state before the actual to-be-executed trajectory.
                 for i in range(1, len(self.traj.points)):
                     # self.traj.points[i].time_from_start += rospy.Time(now) - rospy.Time(self.traj_t0)
                     self.traj.points[i].time_from_start += rospy.Duration(self.RATE)
