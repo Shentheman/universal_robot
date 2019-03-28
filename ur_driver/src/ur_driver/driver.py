@@ -828,11 +828,13 @@ class URTrajectoryFollower(object):
                 #  print "Dangerous! postpone the self.traj\nFrom "\
                         #  + str([p.time_from_start.to_sec() for p in self.traj.points])\
                         #  + "\nTo " + str(self.RATE) + " secs later"
-                # We don't change the first point which is the robot state before the actual to-be-executed trajectory.
-                if len(self.traj.points) > 1:
-                    for i in range(1, len(self.traj.points)):
+                for i in range(1, len(self.traj.points)):
+                    try:
                         # self.traj.points[i].time_from_start += rospy.Time(now) - rospy.Time(self.traj_t0)
                         self.traj.points[i].time_from_start += rospy.Duration(self.RATE)
+                    except:
+                        print range(1, len(self.traj.points)), len(self.traj.points), i
+                        exit(0)
 
             if (now - self.traj_t0) <= self.traj.points[-1].time_from_start.to_sec():
                 self.last_point_sent = False #sending intermediate points
